@@ -169,19 +169,51 @@ select s.store_id, s.manager_staff_id, sum(p.amount)
 -- * 7g. Write a query to display for each store its store ID, city, and country.
 select s.store_id, c.city, co.country
 	from store s
-    inner join address a
+    left join address a
     on s.address_id = a.address_id
-    inner join city c
-    on a.city_id = c.city
-    inner join country co
+    left join city c
+    on a.city_id = c.city_id
+    left join country co
     on c.country_id = co.country_id;
 
--- * 7h. List the top five genres in gross revenue in descending order. (**Hint**: you may need to use the following tables: category, film_category, inventory, payment, and rental.)
+-- * 7h. List the top five genres in gross revenue in descending order. (**Hint**: you may need to 
+-- use the following tables: category, film_category, inventory, payment, and rental.)
+select c.name, sum(p.amount)
+	from category c
+    left join film_category fc
+    on c.category_id = fc.category_id
+    left join inventory i
+    on fc.film_id = i.film_id
+    left join rental r
+    on i.inventory_id = r.inventory_id
+    left join payment p
+    on r.customer_id = p.customer_id
+    group by c.name
+    order by sum(p.amount) desc;
 
--- * 8a. In your new role as an executive, you would like to have an easy way of viewing the Top five genres by gross revenue. Use the solution from the problem above to create a view. If you haven't solved 7h, you can substitute another query to create a view.
-
+-- * 8a. In your new role as an executive, you would like to have an easy way of viewing 
+-- the Top five genres by gross revenue. Use the solution from the problem above to create a view. 
+-- If you haven't solved 7h, you can substitute another query to create a view.
+create view Top5
+as 
+select c.name as Gengre, 
+		sum(p.amount) as Gross_Revenue
+	from category c
+    left join film_category fc
+    on c.category_id = fc.category_id
+    left join inventory i
+    on fc.film_id = i.film_id
+    left join rental r
+    on i.inventory_id = r.inventory_id
+    left join payment p
+    on r.customer_id = p.customer_id
+    group by c.name
+    order by sum(p.amount) desc
+    limit 5;
+    
 -- * 8b. How would you display the view that you created in 8a?
-
+select *
+from Top5;
 -- * 8c. You find that you no longer need the view `top_five_genres`. Write a query to delete it.
-
+DROP VIEW IF EXISTS Top5;
 
